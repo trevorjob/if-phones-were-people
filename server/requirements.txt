@@ -1,0 +1,17 @@
+# requirements.txt
+Django
+djangorestframework
+django-cors-headers
+psycopg2-binary
+python-decouple
+celery
+redis
+openai
+anthropic
+django-extensions
+pillow
+cryptography
+requests
+python-dateutil
+django-filter
+django-timezone-field
