@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from .models import UserProfile
 from .serializers import (
@@ -23,6 +24,8 @@ class UserViewSet(viewsets.ModelViewSet):
     destroy: Delete user
     me: Get/update current user
     change_password: Change password
+    logout: Logout user (blacklist refresh token)
+    stats: Get user statistics
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -40,6 +43,24 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'change_password':
             return ChangePasswordSerializer
         return UserSerializer
+    
+    def create(self, request, *args, **kwargs):
+        """Register a new user and return JWT tokens"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'user': UserSerializer(user).data,
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            },
+            'message': 'User registered successfully'
+        }, status=status.HTTP_201_CREATED)
     
     @action(detail=False, methods=['get', 'put', 'patch'])
     def me(self, request):
@@ -60,10 +81,31 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         user = request.user
+        
+        # Verify old password
+        if not user.check_password(serializer.validated_data['old_password']):
+            return Response(
+                {"error": "Old password is incorrect"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Set new password
         user.set_password(serializer.validated_data['new_password'])
         user.save()
         
         return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        """Logout user by blacklisting the refresh token"""
+        try:
+            refresh_token = request.data.get('refresh_token')
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
     def stats(self, request):

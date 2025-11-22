@@ -90,7 +90,7 @@ class UsageData(models.Model):
 class AppUsage(models.Model):
     """Daily app usage data"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    device_app = models.ForeignKey('apps.DeviceApp', on_delete=models.CASCADE, related_name='usage_data')
+    device_app = models.ForeignKey('applications.DeviceApp', on_delete=models.CASCADE, related_name='usage_data')
     date = models.DateField()
     
     # Basic usage metrics
@@ -166,17 +166,15 @@ class UsagePattern(models.Model):
     pattern_type = models.CharField(
         max_length=30,
         choices=[
-            ('morning_routine', 'Morning Routine'),
-            ('evening_wind_down', 'Evening Wind Down'),
-            ('work_hours', 'Work Hours Pattern'),
-            ('weekend_binge', 'Weekend Binge'),
-            ('late_night_usage', 'Late Night Usage'),
-            ('app_addiction', 'App Addiction'),
-            ('productivity_streak', 'Productivity Streak'),
-            ('social_media_spiral', 'Social Media Spiral'),
-            ('digital_detox', 'Digital Detox'),
-            ('device_switching', 'Device Switching Pattern'),
-            ('procrastination', 'Procrastination Pattern')
+            ('binge_usage', 'Binge Usage'),
+            ('night_owl', 'Night Owl'),
+            ('morning_person', 'Morning Person'),
+            ('weekend_warrior', 'Weekend Warrior'),
+            ('distracted', 'Distracted'),
+            ('doom_scrolling', 'Doom Scrolling'),
+            ('phantom_vibration', 'Phantom Vibration'),
+            ('app_switching', 'App Switching'),
+            ('notification_addiction', 'Notification Addiction')
         ]
     )
     
@@ -188,10 +186,9 @@ class UsagePattern(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)  # Null for ongoing patterns
     days_observed = models.IntegerField(default=1)
-    
-    # Pattern data
+      # Pattern data
     pattern_data = models.JSONField(default=dict, help_text="Detailed pattern information")
-    apps_involved = models.ManyToManyField('apps.DeviceApp', blank=True)
+    apps_involved = models.ManyToManyField('applications.DeviceApp', blank=True)
     
     # Pattern strength and frequency
     frequency = models.CharField(
@@ -235,8 +232,8 @@ class UsageGoal(models.Model):
     """User-defined usage goals and tracking"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='usage_goals')
     device = models.ForeignKey('devices.Device', on_delete=models.CASCADE, null=True, blank=True)
-    app = models.ForeignKey('apps.DeviceApp', on_delete=models.CASCADE, null=True, blank=True)
-    
+    app = models.ForeignKey('applications.DeviceApp', on_delete=models.CASCADE, null=True, blank=True)
+
     goal_type = models.CharField(
         max_length=30,
         choices=[

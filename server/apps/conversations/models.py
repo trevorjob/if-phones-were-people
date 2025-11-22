@@ -62,11 +62,10 @@ class Conversation(models.Model):
             ('emergency_meeting', 'Emergency Meeting')
         ]
     )
-    
-    # Participants
+      # Participants
     participating_devices = models.ManyToManyField('devices.Device', blank=True)
-    participating_apps = models.ManyToManyField('apps.DeviceApp', blank=True)
-    guest_devices = models.ManyToManyField('social.TemporaryDevice', blank=True)
+    participating_apps = models.ManyToManyField('applications.DeviceApp', blank=True)
+    guest_devices = models.ManyToManyField('social.TemporaryDeviceConnection', blank=True)
     
     # Content
     content = models.TextField(help_text="The full conversation content")
@@ -163,9 +162,8 @@ class DeviceJournal(models.Model):
     # Key events and insights
     notable_events = models.JSONField(default=list, help_text="List of notable events")
     insights = models.TextField(blank=True, help_text="Device's insights about usage patterns")
-    
-    # Relationships and interactions
-    mentioned_apps = models.ManyToManyField('apps.DeviceApp', blank=True)
+      # Relationships and interactions
+    mentioned_apps = models.ManyToManyField('applications.DeviceApp', blank=True)
     mentioned_devices = models.ManyToManyField('devices.Device', blank=True)
     
     # Usage context
@@ -189,7 +187,7 @@ class DeviceJournal(models.Model):
 class AppJournal(models.Model):
     """Individual app journal entries"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    device_app = models.ForeignKey('apps.DeviceApp', on_delete=models.CASCADE, related_name='journal_entries')
+    device_app = models.ForeignKey('applications.DeviceApp', on_delete=models.CASCADE, related_name='journal_entries')
     date = models.DateField()
     
     # Journal content
@@ -213,10 +211,9 @@ class AppJournal(models.Model):
     # App-specific experiences
     session_highlights = models.JSONField(default=list, help_text="Highlights from usage sessions")
     user_behavior_notes = models.TextField(blank=True, help_text="Observations about user behavior")
-    
-    # Relationships
+      # Relationships
     app_interactions = models.JSONField(default=dict, help_text="Interactions with other apps")
-    mentioned_apps = models.ManyToManyField('apps.DeviceApp', blank=True)
+    mentioned_apps = models.ManyToManyField('applications.DeviceApp', blank=True)
     
     # Usage reflection
     usage_satisfaction = models.IntegerField(null=True, blank=True, help_text="1-10 satisfaction with usage")

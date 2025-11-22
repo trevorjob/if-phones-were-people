@@ -5,11 +5,12 @@ from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
 from django.db import transaction
+from django.db.models import Sum, Avg, Count, F, Q
 from apps.ai_engine.services import AIGenerationService
 from apps.conversations.models import Conversation, DeviceJournal, AppJournal
 from apps.devices.models import Device
 from apps.applications.models import DeviceApp
-from apps.usage.models import UsageData, AppUsageData
+from apps.usage.models import UsageData, AppUsage
 import logging
 
 logger = logging.getLogger('ai_engine')
@@ -64,10 +65,10 @@ def generate_conversation_for_user(user, date):
             return False
         
         # Get most used apps from yesterday
-        top_apps = AppUsageData.objects.filter(
-            usage_data__device__user=user,
-            usage_data__date=date
-        ).order_by('-time_spent')[:5]  # Top 5 apps
+        top_apps = AppUsage.objects.filter(
+            device_app__device__user=user,
+            date=date
+        ).order_by('-time_spent_minutes')[:5]  # Top 5 apps
         
         device_apps = [au.device_app for au in top_apps if au.device_app]
         
@@ -80,8 +81,8 @@ def generate_conversation_for_user(user, date):
             device__user=user,
             date=date
         ).aggregate(
-            total_time=models.Sum('total_screen_time'),
-            total_unlocks=models.Sum('unlock_count')
+            total_time=Sum('total_screen_time'),
+            total_unlocks=Sum('unlock_count')
         )
         
         usage_data = {
@@ -95,7 +96,7 @@ def generate_conversation_for_user(user, date):
         from apps.usage.models import UsagePattern
         patterns = UsagePattern.objects.filter(
             user=user,
-            first_detected__date=date
+            start_date=date
         ).values_list('pattern_type', flat=True)
         usage_data['patterns'] = list(patterns)
         
@@ -111,7 +112,6 @@ def generate_conversation_for_user(user, date):
             conversation_type = 'pattern_discussion'
         
         # Generate conversation using AI
-        from django.db import models
         ai_result = AIGenerationService.generate_conversation(
             devices=devices,
             apps=device_apps,
@@ -128,11 +128,11 @@ def generate_conversation_for_user(user, date):
                     conversation_type=conversation_type,
                     mood=mood,
                     content=ai_result['content'],
-                    model_used=ai_result['model_used'],
+                    ai_model_used=ai_result['model_used'],
                     generation_prompt=ai_result['generation_prompt'],
-                    tokens_used=ai_result['tokens_used'],
+                    generation_tokens=ai_result['tokens_used'],
                     generation_cost=ai_result['cost'],
-                    is_ai_generated=True
+                    generation_status='completed'
                 )
                 
                 # Link participants
@@ -180,12 +180,15 @@ def generate_daily_journals():
             error_count += 1
     
     # Generate app journals (for top apps only)
-    from django.db.models import Sum
-    top_device_apps = DeviceApp.objects.filter(
-        app_usage__usage_data__date=today
-    ).annotate(
-        total_time=Sum('app_usage__time_spent')
-    ).order_by('-total_time')[:50]  # Top 50 apps across all users
+    # Query AppUsage directly since there's no direct link through DeviceApp
+    top_app_usage = AppUsage.objects.filter(
+        date=today
+    ).values('device_app').annotate(
+        total_time=Sum('time_spent_minutes')
+    ).order_by('-total_time')[:50]
+    
+    device_app_ids = [item['device_app'] for item in top_app_usage]
+    top_device_apps = DeviceApp.objects.filter(id__in=device_app_ids)
     
     for device_app in top_device_apps:
         try:
@@ -226,10 +229,13 @@ def generate_device_journal_entry(device, date):
         if usage.total_screen_time > 360:
             notable_events.append("Heavy usage day")
         
-        # Get top apps
-        top_apps = device.device_apps.filter(
-            app_usage__usage_data=usage
-        ).order_by('-app_usage__time_spent')[:3]
+        # Get top apps used today
+        top_app_usage = AppUsage.objects.filter(
+            device_app__device=device,
+            date=date
+        ).order_by('-time_spent_minutes')[:3]
+        
+        top_apps = [au.device_app for au in top_app_usage]
         
         # Generate journal
         ai_result = AIGenerationService.generate_device_journal(
@@ -245,10 +251,9 @@ def generate_device_journal_entry(device, date):
                 device=device,
                 date=date,
                 content=ai_result['content'],
-                mood='reflective',
-                model_used=ai_result['model_used'],
+                mood='satisfied',  # Valid choice from model
                 generation_prompt=ai_result['generation_prompt'],
-                is_ai_generated=True
+                ai_generated=True  # Correct field name
             )
             return True
         
@@ -263,21 +268,21 @@ def generate_app_journal_entry(device_app, date):
     """Generate a journal entry for an app"""
     try:
         # Get usage stats for this app
-        app_usage = AppUsageData.objects.filter(
+        app_usage = AppUsage.objects.filter(
             device_app=device_app,
-            usage_data__date=date
+            date=date
         ).first()
         
         if not app_usage:
             return False
         
         usage_stats = {
-            'time_spent': app_usage.time_spent,
+            'time_spent': app_usage.time_spent_minutes,
             'launch_count': app_usage.launch_count
         }
         
         session_highlights = []
-        if app_usage.time_spent > 120:
+        if app_usage.time_spent_minutes > 120:
             session_highlights.append("Power user session")
         if app_usage.launch_count > 20:
             session_highlights.append("Frequently opened")
@@ -295,10 +300,9 @@ def generate_app_journal_entry(device_app, date):
                 device_app=device_app,
                 date=date,
                 content=ai_result['content'],
-                mood='playful',
-                model_used=ai_result['model_used'],
+                mood='satisfied',  # Valid choice from model
                 generation_prompt=ai_result['generation_prompt'],
-                is_ai_generated=True
+                ai_generated=True  # Correct field name
             )
             return True
         

@@ -1,0 +1,2038 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "If Phones Were People - Complete API",
+		"description": "Complete API collection for If Phones Were People application with JWT authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', jsonData.tokens.access);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.tokens.refresh);",
+									"    pm.collectionVariables.set('user_id', jsonData.user.id);",
+									"    console.log('Tokens saved to collection variables');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"SecurePass123!\",\n    \"password_confirm\": \"SecurePass123!\",\n    \"display_name\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								""
+							]
+						},
+						"description": "Register a new user account and receive JWT tokens"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Get JWT Tokens)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', jsonData.access);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+									"    console.log('Access token saved:', jsonData.access);",
+									"    console.log('Refresh token saved:', jsonData.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser@example.com\",\n    \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Login with username/email and password to get JWT access and refresh tokens"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', jsonData.access);",
+									"    console.log('New access token saved:', jsonData.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh",
+								""
+							]
+						},
+						"description": "Get a new access token using the refresh token"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{access_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify",
+								""
+							]
+						},
+						"description": "Verify if an access token is valid"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/logout/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"logout",
+								""
+							]
+						},
+						"description": "Logout by blacklisting the refresh token"
+					},
+					"response": []
+				}
+			],
+			"description": "JWT Authentication endpoints"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"me",
+								""
+							]
+						},
+						"description": "Get currently authenticated user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Current User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"display_name\": \"Updated Name\",\n    \"timezone\": \"America/New_York\",\n    \"conversation_frequency\": \"daily\",\n    \"profile\": {\n        \"digital_wellness_goal\": \"reduce_usage\",\n        \"daily_summary_enabled\": true\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"me",
+								""
+							]
+						},
+						"description": "Update current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_password\": \"SecurePass123!\",\n    \"new_password\": \"NewSecurePass456!\",\n    \"new_password_confirm\": \"NewSecurePass456!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/change_password/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"change_password",
+								""
+							]
+						},
+						"description": "Change user password"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/stats/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"stats",
+								""
+							]
+						},
+						"description": "Get user statistics summary"
+					},
+					"response": []
+				},
+				{
+					"name": "List All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								""
+							]
+						},
+						"description": "Get list of all users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/accounts/users/{{user_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"users",
+								"{{user_id}}",
+								""
+							]
+						},
+						"description": "Get specific user by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/accounts/profiles/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"profiles",
+								"me",
+								""
+							]
+						},
+						"description": "Get current user's profile details"
+					},
+					"response": []
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"favorite_device_type\": \"phone\",\n    \"digital_wellness_goal\": \"balance\",\n    \"daily_summary_enabled\": true,\n    \"conversation_notifications\": true,\n    \"weekly_insights\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/accounts/profiles/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"profiles",
+								"me",
+								""
+							]
+						},
+						"description": "Update profile settings"
+					},
+					"response": []
+				}
+			],
+			"description": "User account and profile management"
+		},
+		{
+			"name": "Devices",
+			"item": [
+				{
+					"name": "List My Devices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								""
+							]
+						},
+						"description": "Get all user's devices"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Device",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('device_id', jsonData.id);",
+									"    console.log('Device ID saved:', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My iPhone\",\n    \"platform\": \"ios\",\n    \"model_name\": \"iPhone 14 Pro\",\n    \"personality_type\": \"snarky\",\n    \"os_version\": \"iOS 17.1\",\n    \"is_primary\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								""
+							]
+						},
+						"description": "Add a new device"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Device Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/{{device_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"{{device_id}}",
+								""
+							]
+						},
+						"description": "Get specific device details"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Device",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Updated iPhone\",\n    \"personality_type\": \"supportive\",\n    \"battery_level\": 85\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/{{device_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"{{device_id}}",
+								""
+							]
+						},
+						"description": "Update device information"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Primary Device",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/{{device_id}}/set_primary/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"{{device_id}}",
+								"set_primary",
+								""
+							]
+						},
+						"description": "Set device as primary"
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Device",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"battery_level\": 75,\n    \"last_usage\": \"2024-11-16T10:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/{{device_id}}/sync/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"{{device_id}}",
+								"sync",
+								""
+							]
+						},
+						"description": "Update device sync status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Devices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"active",
+								""
+							]
+						},
+						"description": "Get only active devices"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Device",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/devices/{{device_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"devices",
+								"{{device_id}}",
+								""
+							]
+						},
+						"description": "Delete a device"
+					},
+					"response": []
+				},
+				{
+					"name": "List Device Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/device-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"device-types",
+								""
+							]
+						},
+						"description": "Get all device types"
+					},
+					"response": []
+				},
+				{
+					"name": "List Personality Traits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/personality-traits/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"personality-traits",
+								""
+							]
+						},
+						"description": "Get all personality traits"
+					},
+					"response": []
+				},
+				{
+					"name": "List Device Relationships",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/device-relationships/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"device-relationships",
+								""
+							]
+						},
+						"description": "Get device relationships"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Device Relationship",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device_a\": \"{{device_id}}\",\n    \"device_b\": \"<device_b_id>\",\n    \"relationship_type\": \"best_friends\",\n    \"intensity\": 8,\n    \"notes\": \"Always syncing together\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/devices/device-relationships/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"devices",
+								"device-relationships",
+								""
+							]
+						},
+						"description": "Create relationship between devices"
+					},
+					"response": []
+				}
+			],
+			"description": "Device management endpoints"
+		},
+		{
+			"name": "Applications",
+			"item": [
+				{
+					"name": "List Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/apps/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"apps",
+								""
+							]
+						},
+						"description": "Get all available apps from registry"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/apps/?search=Instagram",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"apps",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Instagram"
+								}
+							]
+						},
+						"description": "Search for apps"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Popular Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/apps/popular/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"apps",
+								"popular",
+								""
+							]
+						},
+						"description": "Get most popular apps"
+					},
+					"response": []
+				},
+				{
+					"name": "Find or Create App",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('app_id', jsonData.app.id);",
+									"    console.log('App ID saved:', jsonData.app.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bundle_id\": \"com.instagram.instagram\",\n    \"name\": \"Instagram\",\n    \"default_personality\": \"attention_seeking\",\n    \"is_social_media\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/apps/apps/find_or_create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"apps",
+								"find_or_create",
+								""
+							]
+						},
+						"description": "Find app by bundle ID or create if doesn't exist"
+					},
+					"response": []
+				},
+				{
+					"name": "List App Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"categories",
+								""
+							]
+						},
+						"description": "Get all app categories"
+					},
+					"response": []
+				},
+				{
+					"name": "List My Device Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/device-apps/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"device-apps",
+								""
+							]
+						},
+						"description": "Get apps installed on user's devices"
+					},
+					"response": []
+				},
+				{
+					"name": "Add App to Device",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('device_app_id', jsonData.id);",
+									"    console.log('Device App ID saved:', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device\": \"{{device_id}}\",\n    \"app\": \"{{app_id}}\",\n    \"display_name\": \"My Instagram\",\n    \"is_active\": true,\n    \"is_favorite\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/apps/device-apps/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"device-apps",
+								""
+							]
+						},
+						"description": "Install app on device"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle App Favorite",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/device-apps/{{device_app_id}}/toggle_favorite/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"device-apps",
+								"{{device_app_id}}",
+								"toggle_favorite",
+								""
+							]
+						},
+						"description": "Toggle favorite status for app"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle App Hidden",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/device-apps/{{device_app_id}}/toggle_hidden/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"device-apps",
+								"{{device_app_id}}",
+								"toggle_hidden",
+								""
+							]
+						},
+						"description": "Toggle hidden status for app"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorite Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/apps/device-apps/favorites/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"apps",
+								"device-apps",
+								"favorites",
+								""
+							]
+						},
+						"description": "Get only favorite apps"
+					},
+					"response": []
+				}
+			],
+			"description": "Application and app installation endpoints"
+		},
+		{
+			"name": "Usage Tracking",
+			"item": [
+				{
+					"name": "Upload Usage Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"device_id\": \"{{device_id}}\",\n        \"date\": \"2024-11-16\",\n        \"total_screen_time\": 320,\n        \"unlock_count\": 85,\n        \"pickup_count\": 120,\n        \"notification_count\": 45,\n        \"first_pickup_time\": \"07:30:00\",\n        \"last_usage_time\": \"23:15:00\",\n        \"battery_start\": 100,\n        \"battery_end\": 25,\n        \"hourly_usage\": [0,0,0,0,0,0,10,25,30,15,20,25,30,15,20,25,30,20,25,15,10,5,5,0],\n        \"collection_method\": \"ios_shortcuts\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/usage/usage-data/bulk_upload/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"usage-data",
+								"bulk_upload",
+								""
+							]
+						},
+						"description": "Bulk upload usage data for multiple days"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Usage Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/usage-data/?device={{device_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"usage-data",
+								""
+							],
+							"query": [
+								{
+									"key": "device",
+									"value": "{{device_id}}"
+								}
+							]
+						},
+						"description": "Get usage data for specific device"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Usage Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/usage-data/summary/?start_date=2024-11-10&end_date=2024-11-16&device_id={{device_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"usage-data",
+								"summary",
+								""
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-11-10"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-11-16"
+								},
+								{
+									"key": "device_id",
+									"value": "{{device_id}}"
+								}
+							]
+						},
+						"description": "Get usage summary for date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Get App Usage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/app-usage/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"app-usage",
+								""
+							]
+						},
+						"description": "Get app usage data"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Apps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/app-usage/top_apps/?start_date=2024-11-10&end_date=2024-11-16&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"app-usage",
+								"top_apps",
+								""
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-11-10"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-11-16"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get top apps by usage time"
+					},
+					"response": []
+				},
+				{
+					"name": "List Usage Patterns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/patterns/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"patterns",
+								""
+							]
+						},
+						"description": "Get detected usage patterns"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Patterns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/patterns/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"patterns",
+								"active",
+								""
+							]
+						},
+						"description": "Get only active patterns"
+					},
+					"response": []
+				},
+				{
+					"name": "Acknowledge Pattern",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/patterns/<pattern_id>/acknowledge/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"patterns",
+								"<pattern_id>",
+								"acknowledge",
+								""
+							]
+						},
+						"description": "Mark pattern as acknowledged"
+					},
+					"response": []
+				},
+				{
+					"name": "List Usage Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/goals/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"goals",
+								""
+							]
+						},
+						"description": "Get user's usage goals"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Usage Goal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"goal_type\": \"reduce_total\",\n    \"device\": \"{{device_id}}\",\n    \"target_minutes_daily\": 180,\n    \"start_date\": \"2024-11-16\",\n    \"duration_days\": 30,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/usage/goals/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"goals",
+								""
+							]
+						},
+						"description": "Create a new usage goal"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/usage/goals/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"usage",
+								"goals",
+								"active",
+								""
+							]
+						},
+						"description": "Get only active goals"
+					},
+					"response": []
+				}
+			],
+			"description": "Usage data tracking and goals"
+		},
+		{
+			"name": "Conversations",
+			"item": [
+				{
+					"name": "List Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								""
+							]
+						},
+						"description": "Get all user's conversations"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversation Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/<conversation_id>/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"<conversation_id>",
+								""
+							]
+						},
+						"description": "Get specific conversation"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recent Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/recent/?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"recent",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get recent conversations"
+					},
+					"response": []
+				},
+				{
+					"name": "Rate Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"feedback\": \"This was hilarious!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/<conversation_id>/rate/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"<conversation_id>",
+								"rate",
+								""
+							]
+						},
+						"description": "Rate a conversation (1-5 stars)"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Conversation Favorite",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/<conversation_id>/toggle_favorite/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"<conversation_id>",
+								"toggle_favorite",
+								""
+							]
+						},
+						"description": "Toggle favorite status"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Conversation Hidden",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/<conversation_id>/toggle_hidden/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"<conversation_id>",
+								"toggle_hidden",
+								""
+							]
+						},
+						"description": "Toggle hidden status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorite Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/conversations/favorites/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"conversations",
+								"favorites",
+								""
+							]
+						},
+						"description": "Get only favorite conversations"
+					},
+					"response": []
+				},
+				{
+					"name": "List Device Journals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/device-journals/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"device-journals",
+								""
+							]
+						},
+						"description": "Get device journal entries"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recent Device Journals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/device-journals/recent/?limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"device-journals",
+								"recent",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Get recent device journals"
+					},
+					"response": []
+				},
+				{
+					"name": "List App Journals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/app-journals/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"app-journals",
+								""
+							]
+						},
+						"description": "Get app journal entries"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recent App Journals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/app-journals/recent/?limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"app-journals",
+								"recent",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Get recent app journals"
+					},
+					"response": []
+				}
+			],
+			"description": "AI-generated conversations and journals"
+		},
+		{
+			"name": "Social",
+			"item": [
+				{
+					"name": "List Friends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/friends/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"friends",
+								""
+							]
+						},
+						"description": "Get friend connections"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Friends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/friends/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"friends",
+								"active",
+								""
+							]
+						},
+						"description": "Get only active friends"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Friend",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"friend_user\": \"<friend_user_id>\",\n    \"can_compare_stats\": true,\n    \"can_see_conversations\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/social/friends/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"friends",
+								""
+							]
+						},
+						"description": "Add a friend connection"
+					},
+					"response": []
+				},
+				{
+					"name": "List Device Visits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/device-visits/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"device-visits",
+								""
+							]
+						},
+						"description": "Get temporary device connections"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Device Visits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/device-visits/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"device-visits",
+								"active",
+								""
+							]
+						},
+						"description": "Get active device visits"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Device Visit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visitor_user\": \"<visitor_user_id>\",\n    \"visitor_device\": \"<visitor_device_id>\",\n    \"connection_name\": \"Weekend Hangout\",\n    \"expires_at\": \"2024-11-17T23:59:59Z\",\n    \"can_participate_in_conversations\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/social/device-visits/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"device-visits",
+								""
+							]
+						},
+						"description": "Create temporary device connection"
+					},
+					"response": []
+				},
+				{
+					"name": "List Challenges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/challenges/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"challenges",
+								""
+							]
+						},
+						"description": "Get challenges"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Challenges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/challenges/active/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"challenges",
+								"active",
+								""
+							]
+						},
+						"description": "Get only active challenges"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Challenge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Weekend Screen Time Challenge\",\n    \"description\": \"Keep screen time under 3 hours per day\",\n    \"challenge_type\": \"reduce_screen_time\",\n    \"start_date\": \"2024-11-16\",\n    \"end_date\": \"2024-11-18\",\n    \"target_value\": 180,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/social/challenges/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"challenges",
+								""
+							]
+						},
+						"description": "Create a new challenge"
+					},
+					"response": []
+				},
+				{
+					"name": "Join Challenge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/challenges/<challenge_id>/join/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"challenges",
+								"<challenge_id>",
+								"join",
+								""
+							]
+						},
+						"description": "Join a challenge"
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Challenge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/social/challenges/<challenge_id>/leave/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"social",
+								"challenges",
+								"<challenge_id>",
+								"leave",
+								""
+							]
+						},
+						"description": "Leave a challenge"
+					},
+					"response": []
+				}
+			],
+			"description": "Social features - friends, challenges, device visits"
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get My Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/stats/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"stats",
+								""
+							]
+						},
+						"description": "Get user statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Latest Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/stats/latest/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"stats",
+								"latest",
+								""
+							]
+						},
+						"description": "Get the latest statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "List Trends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/trends/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"trends",
+								""
+							]
+						},
+						"description": "Get trend analyses"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Latest Trends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/trends/latest/?period_type=weekly",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"trends",
+								"latest",
+								""
+							],
+							"query": [
+								{
+									"key": "period_type",
+									"value": "weekly"
+								}
+							]
+						},
+						"description": "Get latest trend analysis"
+					},
+					"response": []
+				}
+			],
+			"description": "Analytics and statistics endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "device_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "app_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "device_app_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

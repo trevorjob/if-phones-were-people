@@ -1,0 +1,272 @@
+.conversation-detail-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.back-btn {
+  background: #f5f7fa;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #667eea;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #e8ebf0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.detail-container {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.detail-header-info {
+  margin-bottom: 32px;
+}
+
+.mood-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  color: #667eea;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-bottom: 16px;
+}
+
+.detail-header-info h1 {
+  font-size: 32px;
+  color: #333;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.meta-item {
+  font-size: 14px;
+  color: #666;
+}
+
+.rating-panel {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.rating-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.star-rating {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.star {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: all 0.2s;
+}
+
+.star.active,
+.star:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.feedback-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.feedback-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.rating-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.summary-section,
+.conversation-content,
+.topics-section,
+.existing-rating {
+  margin-bottom: 32px;
+}
+
+.summary-section h3,
+.conversation-content h3,
+.topics-section h3,
+.existing-rating h3 {
+  font-size: 20px;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.summary-section p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #555;
+  margin: 0;
+}
+
+.content-text {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.conversation-text {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.no-content {
+  color: #999;
+  font-style: italic;
+  margin: 0;
+}
+
+.topics-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topic-tag {
+  background: #667eea;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rating-display {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.rating-number {
+  font-size: 16px;
+  color: #666;
+  margin-left: 8px;
+}
+
+.user-feedback {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detail-loading,
+.detail-error {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #f5f7fa;
+  color: #667eea;
+  border: 2px solid #e0e0e0;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: #667eea;
+  background: white;
+}

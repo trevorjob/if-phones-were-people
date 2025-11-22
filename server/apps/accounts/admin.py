@@ -8,17 +8,23 @@ User = get_user_model()
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'timezone', 'preferred_conversation_time', 'created_at']
-    list_filter = ['timezone', 'created_at']
-    search_fields = ['user__username', 'user__email']
-    readonly_fields = ['created_at', 'updated_at']
+    list_display = ['user', 'favorite_device_type', 'digital_wellness_goal', 'created_at']
+    list_filter = ['favorite_device_type', 'digital_wellness_goal', 'created_at']
+    search_fields = ['user__username', 'user__email', 'friend_code']
+    readonly_fields = ['created_at', 'updated_at', 'friend_code']
     
     fieldsets = (
         ('User', {
             'fields': ('user',)
         }),
         ('Preferences', {
-            'fields': ('timezone', 'preferred_conversation_time', 'conversation_frequency')
+            'fields': ('favorite_device_type', 'digital_wellness_goal')
+        }),
+        ('Social Settings', {
+            'fields': ('friend_code', 'allow_device_invites', 'auto_accept_close_friends')
+        }),
+        ('Notifications', {
+            'fields': ('daily_summary_enabled', 'conversation_notifications', 'weekly_insights', 'friend_activity_notifications')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -41,7 +47,6 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ['username', 'email', 'first_name', 'last_name']
 
 
-# Re-register UserAdmin
-admin.site.unregister(User)
+# Register UserAdmin
 admin.site.register(User, CustomUserAdmin)
 

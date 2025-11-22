@@ -16,15 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Authentication
-    path('api/auth/login/', obtain_auth_token, name='api-token-auth'),
-    
-    # API endpoints
+    # JWT Authentication
+    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/verify/', TokenVerifyView.as_view(), name='token_verify'),
+      # API endpoints
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/devices/', include('apps.devices.urls')),
     path('api/apps/', include('apps.applications.urls')),
@@ -32,4 +37,5 @@ urlpatterns = [
     path('api/conversations/', include('apps.conversations.urls')),
     path('api/social/', include('apps.social.urls')),
     path('api/analytics/', include('apps.analytics.urls')),
+    path('api/ai-engine/', include('apps.ai_engine.urls')),
 ]

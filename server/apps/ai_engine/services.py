@@ -1,7 +1,7 @@
 """
 AI Service for generating conversations, journals, and insights using OpenAI
 """
-import openai
+from openai import OpenAI
 from django.conf import settings
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
@@ -9,14 +9,18 @@ import logging
 
 logger = logging.getLogger('ai_engine')
 
-# Set OpenAI API key
-openai.api_key = settings.OPENAI_API_KEY
+# Initialize OpenAI client (compatible with DeepSeek)
+client = OpenAI(
+    api_key=settings.AI_API_KEY,
+    base_url=settings.AI_BASE_URL  # DeepSeek uses custom base URL
+)
 
 
 class AIGenerationService:
     """Service for AI content generation"""
     
-    DEFAULT_MODEL = "gpt-4"
+    # Model configuration - works with both OpenAI and DeepSeek
+    DEFAULT_MODEL = settings.AI_MODEL  # e.g., "deepseek-chat" or "gpt-4"
     DEFAULT_TEMPERATURE = 0.8
     DEFAULT_MAX_TOKENS = 1000
     
@@ -54,8 +58,8 @@ class AIGenerationService:
                 devices, apps, usage_data, triggers
             )
             
-            # Call OpenAI
-            response = openai.ChatCompletion.create(
+            # Call AI API (OpenAI/DeepSeek compatible)
+            response = client.chat.completions.create(
                 model=AIGenerationService.DEFAULT_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -72,8 +76,13 @@ class AIGenerationService:
             completion_tokens = response.usage.completion_tokens
             total_tokens = response.usage.total_tokens
             
-            # GPT-4 pricing (as of 2024): $0.03 per 1K prompt tokens, $0.06 per 1K completion tokens
-            cost = (prompt_tokens * 0.03 + completion_tokens * 0.06) / 1000
+            # Cost calculation based on provider
+            # DeepSeek pricing: ~$0.27 per 1M input tokens, ~$1.10 per 1M output tokens
+            # GPT-4 pricing: $0.03 per 1K input tokens, $0.06 per 1K output tokens
+            if 'deepseek' in AIGenerationService.DEFAULT_MODEL.lower():
+                cost = (prompt_tokens * 0.27 + completion_tokens * 1.10) / 1_000_000
+            else:
+                cost = (prompt_tokens * 0.03 + completion_tokens * 0.06) / 1000
             
             logger.info(f"Generated conversation: {total_tokens} tokens, ${cost:.4f}")
             
@@ -249,8 +258,8 @@ Keep it under 300 words. Write in first person."""
             
             user_prompt = "\n".join(context_parts) + "\n\nWrite your journal entry:"
             
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Use cheaper model for journals
+            response = client.chat.completions.create(
+                model=settings.AI_JOURNAL_MODEL,  # Use cheaper/faster model for journals
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -316,8 +325,8 @@ Write a brief journal entry (150 words max) about today from your perspective. S
             
             user_prompt = "\n".join(context_parts) + "\n\nWrite your journal entry:"
             
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+            response = client.chat.completions.create(
+                model=settings.AI_JOURNAL_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
