@@ -231,7 +231,9 @@ Instagram: OMG what happened?!
         Returns:
             Dictionary with journal content and metadata
         """
-        try:
+        try:            
+            print(f"servcic -started generating journal for device")
+
             system_prompt = f"""You are {device.name}, a {device.platform} device with a {device.personality_type} personality.
             
 Your personality: {device.personality_description}
@@ -269,7 +271,7 @@ Keep it under 300 words. Write in first person."""
             )
             
             content = response.choices[0].message.content
-            
+            print(device)
             logger.info(f"Generated device journal for {device.name}")
             
             return {
@@ -307,7 +309,8 @@ Keep it under 300 words. Write in first person."""
             Dictionary with journal content and metadata
         """
         try:
-            system_prompt = f"""You are {device_app.display_name}, an app with a {device_app.effective_personality} personality.
+            print(device_app)
+            system_prompt = f"""You are {device_app.app.name}, an app with a {device_app.effective_personality} personality.
 
 Write a brief journal entry (150 words max) about today from your perspective. Stay in character and be entertaining."""
             
@@ -337,7 +340,7 @@ Write a brief journal entry (150 words max) about today from your perspective. S
             
             content = response.choices[0].message.content
             
-            logger.info(f"Generated app journal for {device_app.display_name}")
+            # logger.info(f"Generated app journal for {device_app.app.name}")
             
             return {
                 'content': content,

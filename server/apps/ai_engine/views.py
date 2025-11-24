@@ -56,8 +56,9 @@ def generate_journals_for_user(request):
         
         # Generate device journals
         for device in devices:
+            print(f"started generating journal for device")
             try:
-                generate_device_journal_entry(device.id, target_date)
+                generate_device_journal_entry(device, target_date)
                 device_count += 1
             except Exception as e:
                 print(f"Error generating journal for device {device.id}: {str(e)}")
@@ -70,7 +71,7 @@ def generate_journals_for_user(request):
         
         for device_app in top_apps:
             try:
-                generate_app_journal_entry(device_app.id, target_date)
+                generate_app_journal_entry(device_app, target_date)
                 app_count += 1
             except Exception as e:
                 print(f"Error generating journal for app {device_app.id}: {str(e)}")

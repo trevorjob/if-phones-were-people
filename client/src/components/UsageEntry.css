@@ -275,3 +275,38 @@
   color: #666;
   padding: 32px;
 }
+
+/* Device Stats Section */
+.device-stats-section {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.device-stats-section h3 {
+  margin: 0 0 8px 0;
+  color: #667eea;
+  font-size: 20px;
+}
+
+.section-description {
+  margin: 0 0 20px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.device-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.device-stats-grid .form-group small {
+  display: block;
+  margin-top: 4px;
+  color: #667eea;
+  font-size: 12px;
+  font-weight: 600;
+}

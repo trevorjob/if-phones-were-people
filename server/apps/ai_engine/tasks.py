@@ -213,10 +213,14 @@ def generate_device_journal_entry(device, date):
     """Generate a journal entry for a device"""
     try:
         # Get usage summary
+        print(f"task - started generating journal for device")
+
         usage = UsageData.objects.filter(device=device, date=date).first()
         if not usage:
+            print(f"task usage false")
+            print(usage)
             return False
-        
+        print(f"task usage")
         usage_summary = {
             'screen_time': usage.total_screen_time,
             'unlocks': usage.unlock_count
@@ -245,16 +249,19 @@ def generate_device_journal_entry(device, date):
             notable_events=notable_events,
             mentioned_apps=list(top_apps)
         )
-        
         if ai_result['success']:
-            DeviceJournal.objects.create(
+            # Use update_or_create to avoid duplicate entries
+            DeviceJournal.objects.update_or_create(
                 device=device,
                 date=date,
-                content=ai_result['content'],
-                mood='satisfied',  # Valid choice from model
-                generation_prompt=ai_result['generation_prompt'],
-                ai_generated=True  # Correct field name
+                defaults={
+                    'content': ai_result['content'],
+                    'mood': 'satisfied',  # Valid choice from model
+                    'generation_prompt': ai_result['generation_prompt'],
+                    'ai_generated': True  # Correct field name
+                }
             )
+            logger.info(f"Generated/updated device journal for {device.name} on {date}")
             return True
         
         return False
@@ -294,16 +301,19 @@ def generate_app_journal_entry(device_app, date):
             usage_stats=usage_stats,
             session_highlights=session_highlights
         )
-        
         if ai_result['success']:
-            AppJournal.objects.create(
+            # Use update_or_create to avoid duplicate entries
+            AppJournal.objects.update_or_create(
                 device_app=device_app,
                 date=date,
-                content=ai_result['content'],
-                mood='satisfied',  # Valid choice from model
-                generation_prompt=ai_result['generation_prompt'],
-                ai_generated=True  # Correct field name
+                defaults={
+                    'content': ai_result['content'],
+                    'mood': 'satisfied',  # Valid choice from model
+                    'generation_prompt': ai_result['generation_prompt'],
+                    'ai_generated': True  # Correct field name
+                }
             )
+            logger.info(f"Generated/updated app journal for {device_app.display_name} on {date}")
             return True
         
         return False

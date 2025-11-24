@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { devicesAPI, appsAPI, deviceAppsAPI, appUsageAPI } from '../services/api';
+import { devicesAPI, appsAPI, deviceAppsAPI, appUsageAPI, usageAPI } from '../services/api';
 import './UsageEntry.css';
 
 export default function UsageEntry() {
@@ -14,10 +14,27 @@ export default function UsageEntry() {
   const [submitting, setSubmitting] = useState(false);
   const [showAddApp, setShowAddApp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-    const [usageEntries, setUsageEntries] = useState<any[]>([{
+  
+  // Device-level usage data (for journal generation)
+  const [deviceUsage, setDeviceUsage] = useState({
+    date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
+    total_screen_time: 0,
+    unlock_count: 0,
+    pickup_count: 0,
+    notification_count: 0,
+    first_pickup_time: '',
+    last_usage_time: '',
+    battery_start_percent: 100,
+    battery_end_percent: 100,
+    collection_method: "manual_entry",
+    weekday: 4
+  });
+  
+  // App-level usage entries
+  const [usageEntries, setUsageEntries] = useState<any[]>([{
     id: Date.now(),
     device_app: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
     time_spent_minutes: 0,
     launch_count: 1,
   }]);
@@ -43,12 +60,11 @@ export default function UsageEntry() {
     } finally {
       setLoading(false);
     }
-  };
-  const addUsageEntry = () => {
+  };  const addUsageEntry = () => {
     setUsageEntries([...usageEntries, {
       id: Date.now(),
       device_app: '',
-      date: new Date().toISOString().split('T')[0],
+      date: deviceUsage.date, // Use same date as device usage
       time_spent_minutes: 0,
       launch_count: 1,
     }]);
@@ -77,29 +93,53 @@ export default function UsageEntry() {
       console.error('Failed to install app:', error);
       alert('Failed to install app');
     }
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
+  };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate
+    // Validate device usage
+    if (deviceUsage.total_screen_time <= 0) {
+      alert('Please enter total screen time for the device');
+      return;
+    }
+    
+    // Validate app entries
     const invalidEntries = usageEntries.filter(e => !e.device_app || e.time_spent_minutes <= 0);
     if (invalidEntries.length > 0) {
-      alert('Please fill in all fields with valid data');
+      alert('Please fill in all app usage fields with valid data');
       return;
     }
 
     setSubmitting(true);
     try {
-      // Prepare data for AppUsage API
-      const data = usageEntries.map(entry => ({
+      // 1. Submit device-level usage data first
+      const deviceUsageData = {
+        device: deviceId,
+        date: deviceUsage.date,
+        total_screen_time: deviceUsage.total_screen_time,
+        unlock_count: deviceUsage.unlock_count,
+        pickup_count: deviceUsage.pickup_count,
+        notification_count: deviceUsage.notification_count,
+        first_pickup_time: deviceUsage.first_pickup_time || null,
+        last_usage_time: deviceUsage.last_usage_time || null,
+        battery_start_percent: deviceUsage.battery_start_percent,
+        battery_end_percent: deviceUsage.battery_end_percent,
+        collection_method: "manual_entry",
+        weekday: 4
+      };
+      
+      await usageAPI.create(deviceUsageData);
+      
+      // 2. Submit app-level usage data
+      const appUsageData = usageEntries.map(entry => ({
         device_app: entry.device_app,
         date: entry.date,
         time_spent_minutes: entry.time_spent_minutes,
         launch_count: entry.launch_count,
       }));
 
-      await appUsageAPI.bulkCreate(data);
-      alert('Usage data submitted successfully!');
+      await appUsageAPI.bulkCreate(appUsageData);
+      
+      alert('Usage data submitted successfully! You can now generate journals for this device.');
       navigate('/');
     } catch (error: any) {
       console.error('Failed to submit usage data:', error);
@@ -172,6 +212,124 @@ export default function UsageEntry() {
                 </div>
               </div>
 
+              {/* Device-Level Usage Stats */}
+              <div className="device-stats-section">
+                <h3>📱 Device Stats for {deviceUsage.date}</h3>
+                <p className="section-description">
+                  Enter overall device usage statistics for yesterday. These are required for journal generation.
+                </p>
+                
+                <div className="device-stats-grid">
+                  <div className="form-group">
+                    <label>Date *</label>
+                    <input
+                      type="date"
+                      value={deviceUsage.date}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        setDeviceUsage({ ...deviceUsage, date: newDate });
+                        // Update all app entries to match
+                        setUsageEntries(usageEntries.map(entry => ({ ...entry, date: newDate })));
+                      }}
+                      required
+                      max={new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Total Screen Time (minutes) *</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.total_screen_time}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, total_screen_time: parseInt(e.target.value) || 0 })}
+                      required
+                      min="0"
+                      placeholder="e.g., 240"
+                    />
+                    <small>{deviceUsage.total_screen_time > 0 && `≈ ${Math.floor(deviceUsage.total_screen_time / 60)}h ${deviceUsage.total_screen_time % 60}m`}</small>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Unlock Count *</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.unlock_count}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, unlock_count: parseInt(e.target.value) || 0 })}
+                      required
+                      min="0"
+                      placeholder="e.g., 80"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Pickup Count *</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.pickup_count}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, pickup_count: parseInt(e.target.value) || 0 })}
+                      required
+                      min="0"
+                      placeholder="e.g., 50"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Notification Count</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.notification_count}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, notification_count: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      placeholder="e.g., 120"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>First Pickup Time</label>
+                    <input
+                      type="time"
+                      value={deviceUsage.first_pickup_time}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, first_pickup_time: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Last Usage Time</label>
+                    <input
+                      type="time"
+                      value={deviceUsage.last_usage_time}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, last_usage_time: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Battery Start %</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.battery_start_percent}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, battery_start_percent: parseInt(e.target.value) || 100 })}
+                      min="0"
+                      max="100"
+                      placeholder="100"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Battery End %</label>
+                    <input
+                      type="number"
+                      value={deviceUsage.battery_end_percent}
+                      onChange={(e) => setDeviceUsage({ ...deviceUsage, battery_end_percent: parseInt(e.target.value) || 100 })}
+                      min="0"
+                      max="100"
+                      placeholder="20"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* App-Level Usage Entries */}
+              <h3 style={{ marginTop: '2rem' }}>📲 App Usage</h3>
               <div className="usage-entries">
                 {usageEntries.map((entry, index) => (
                   <div key={entry.id} className="usage-entry-card">
